@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1112</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Music Player</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">color: white;
+</string>
+  </property>
+  <widget class="QWidget" name="mainView">
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="contentView">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="sideMenu">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #2B2B2B</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QPushButton" name="btnChooseFolder">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>281</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>Yu Gothic UI Semibold</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Choose Music Folder</string>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QScrollArea" name="listView">
+         <property name="styleSheet">
+          <string notr="true">background-color: black</string>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>808</width>
+            <height>476</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2"/>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="mediaPlayerView">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>120</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>120</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #0B263B</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="mediaPlayer">
+         <property name="minimumSize">
+          <size>
+           <width>500</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>500</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QFrame" name="mediaPlayerButtons">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>78</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">red</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QPushButton" name="btnPlayPause">
+             <property name="geometry">
+              <rect>
+               <x>224</x>
+               <y>14</y>
+               <width>50</width>
+               <height>50</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+	border-style: solid;
+	border-color: white;
+	border-width: 3px;
+	border-radius: 25%;
+}
+
+QPushButton:hover {
+	background-color: rgba(240, 240, 240, 100);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="btnShuffle">
+             <property name="geometry">
+              <rect>
+               <x>120</x>
+               <y>18</y>
+               <width>41</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+	border-style: solid;
+	border-color: white;
+	border-width: 3px;
+	border-radius: 20%;
+}
+QPushButton:hover {
+	background-color: rgba(240, 240, 240, 100);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="btnPrev">
+             <property name="geometry">
+              <rect>
+               <x>170</x>
+               <y>18</y>
+               <width>41</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+	border-style: solid;
+	border-color: white;
+	border-width: 3px;
+	border-radius: 20%;
+}
+
+QPushButton:hover {
+	background-color: rgba(240, 240, 240, 100);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="btnNext">
+             <property name="geometry">
+              <rect>
+               <x>286</x>
+               <y>18</y>
+               <width>41</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+	border-style: solid;
+	border-color: white;
+	border-width: 3px;
+	border-radius: 20%;
+}
+QPushButton:hover {
+	background-color: rgba(240, 240, 240, 100);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="btnLoop">
+             <property name="geometry">
+              <rect>
+               <x>336</x>
+               <y>18</y>
+               <width>41</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+	border-style: solid;
+	border-color: white;
+	border-width: 3px;
+	border-radius: 20%;
+}
+QPushButton:hover {
+	background-color: rgba(240, 240, 240, 100);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="mediaPlayerProgressBarContainer">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>7</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>7</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="mediaPlayerLabelTimeStamp">
+               <property name="font">
+                <font>
+                 <family>Yu Gothic UI Semibold</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="text">
+                <string>00:00</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="margin">
+                <number>3</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="mediaPlayerProgress">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mediaPlayerLabelLength">
+               <property name="font">
+                <font>
+                 <family>Yu Gothic UI Semibold</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>00:00</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
