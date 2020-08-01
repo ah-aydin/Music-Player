@@ -2,11 +2,16 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 import utils
 
 class Ui_MainWindow(object):
+    """
+    UI setup functions
+    """
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1112, 600)
         MainWindow.setMinimumSize(QtCore.QSize(800, 600))
         MainWindow.setStyleSheet("color: white;")
+
+        # The main view that contains everything
         self.mainView = QtWidgets.QWidget(MainWindow)
         self.mainView.setAutoFillBackground(False)
         self.mainView.setObjectName("mainView")
@@ -14,6 +19,31 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
+
+        # Contains the side-menu and the list-view
+        self.setupContentView()
+        self.verticalLayout.addWidget(self.contentView)
+
+        # Media player controls
+        self.setupMediaPlayerView()
+        self.verticalLayout.addWidget(self.mediaPlayerView)
+        MainWindow.setCentralWidget(self.mainView)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        self.player = QtMultimedia.QMediaPlayer(None)
+
+        self.ConnectEvents()
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "Music Player"))
+        self.btnChooseFolder.setText(_translate("MainWindow", "Choose Music Folder"))
+        self.mediaPlayerLabelTimeStamp.setText(_translate("MainWindow", "00:00"))
+        self.mediaPlayerLabelLength.setText(_translate("MainWindow", "00:00"))
+    
+    def setupContentView(self):
         self.contentView = QtWidgets.QFrame(self.mainView)
         self.contentView.setStyleSheet("")
         self.contentView.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -23,21 +53,33 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setObjectName("horizontalLayout")
+
+        # The side-menu that has a list of buttons to swap between views and choose the musics folder
+        self.setupSideMenu()
+        self.horizontalLayout.addWidget(self.sideMenu)
+
+        # The list-view that contains all the tracks from the chosen directory
+        self.setupListView()
+        self.horizontalLayout.addWidget(self.listView)
+
+    def setupSideMenu(self):
         self.sideMenu = QtWidgets.QFrame(self.contentView)
         self.sideMenu.setMinimumSize(QtCore.QSize(300, 0))
         self.sideMenu.setStyleSheet("background-color: #2B2B2B")
         self.sideMenu.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.sideMenu.setFrameShadow(QtWidgets.QFrame.Raised)
         self.sideMenu.setObjectName("sideMenu")
+
         self.btnChooseFolder = QtWidgets.QPushButton(self.sideMenu)
         self.btnChooseFolder.setGeometry(QtCore.QRect(10, 10, 281, 31))
-        font = QtGui.QFont()
-        font.setFamily("Yu Gothic UI Semibold")
-        font.setPointSize(12)
-        self.btnChooseFolder.setFont(font)
+        self.font = QtGui.QFont()
+        self.font.setFamily("Yu Gothic UI Semibold")
+        self.font.setPointSize(12)
+        self.btnChooseFolder.setFont(self.font)
         self.btnChooseFolder.setStyleSheet("")
         self.btnChooseFolder.setObjectName("btnChooseFolder")
-        self.horizontalLayout.addWidget(self.sideMenu)
+
+    def setupListView(self):
         self.listView = QtWidgets.QScrollArea(self.contentView)
         self.listView.setStyleSheet("background-color: black")
         self.listView.setWidgetResizable(True)
@@ -45,11 +87,15 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 808, 476))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.track_list_view_container = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.track_list_view_container.setAlignment(QtCore.Qt.AlignTop)
+        self.track_list_view_container.setObjectName("track_list_view_container")
+
         self.listView.setWidget(self.scrollAreaWidgetContents)
-        self.horizontalLayout.addWidget(self.listView)
-        self.verticalLayout.addWidget(self.contentView)
+
+        self.track_list_view_container.addWidget(QtWidgets.QLabel("Music"))
+
+    def setupMediaPlayerView(self):
         self.mediaPlayerView = QtWidgets.QFrame(self.mainView)
         self.mediaPlayerView.setMinimumSize(QtCore.QSize(0, 120))
         self.mediaPlayerView.setMaximumSize(QtCore.QSize(16777215, 120))
@@ -60,6 +106,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.mediaPlayerView)
         self.horizontalLayout_2.setContentsMargins(-1, 0, -1, 0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+
         self.mediaPlayer = QtWidgets.QFrame(self.mediaPlayerView)
         self.mediaPlayer.setMinimumSize(QtCore.QSize(500, 0))
         self.mediaPlayer.setMaximumSize(QtCore.QSize(500, 16777215))
@@ -70,6 +117,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.mediaPlayer)
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+
         self.mediaPlayerButtons = QtWidgets.QFrame(self.mediaPlayer)
         self.mediaPlayerButtons.setMinimumSize(QtCore.QSize(0, 78))
         self.mediaPlayerButtons.setStyleSheet("red")
@@ -161,12 +209,32 @@ class Ui_MainWindow(object):
         self.mediaPlayerLabelTimeStamp.setAlignment(QtCore.Qt.AlignCenter)
         self.mediaPlayerLabelTimeStamp.setObjectName("mediaPlayerLabelTimeStamp")
         self.horizontalLayout_3.addWidget(self.mediaPlayerLabelTimeStamp)
+
         self.slider = QtWidgets.QSlider(self.sliderBarContainer)
+        self.slider.setFixedWidth(367)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
         self.slider.setObjectName("slider")
+        self.slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                border: none;
+                height: 2px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+                background: white;
+                margin: 2px 0;
+            }
+
+            QSlider::handle:horizontal {
+                background: #0B263B;
+                border: 2px solid white;
+                width: 12px;
+                margin: -2px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+                border-radius: 7px;
+                margin: -7px 0;
+            }
+        """)
         self.sliderIsPressed = False
         self.sliderPosition = 0
         self.horizontalLayout_3.addWidget(self.slider)
+
         self.mediaPlayerLabelLength = QtWidgets.QLabel(self.sliderBarContainer)
         font = QtGui.QFont()
         font.setFamily("Yu Gothic UI Semibold")
@@ -176,26 +244,9 @@ class Ui_MainWindow(object):
         self.mediaPlayerLabelLength.setObjectName("mediaPlayerLabelLength")
         self.horizontalLayout_3.addWidget(self.mediaPlayerLabelLength)
         self.verticalLayout_3.addWidget(self.sliderBarContainer)
+
         self.horizontalLayout_2.addWidget(self.mediaPlayer)
-        self.verticalLayout.addWidget(self.mediaPlayerView)
-        MainWindow.setCentralWidget(self.mainView)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        self.player = QtMultimedia.QMediaPlayer(None)
-
-        
-
-        self.ConnectEvents()
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Music Player"))
-        self.btnChooseFolder.setText(_translate("MainWindow", "Choose Music Folder"))
-        self.mediaPlayerLabelTimeStamp.setText(_translate("MainWindow", "00:00"))
-        self.mediaPlayerLabelLength.setText(_translate("MainWindow", "00:00"))
-    
     def ConnectEvents(self):
         self.btnChooseFolder.clicked.connect(self.OnChooseFolder)
         self.btnPlayPause.clicked.connect(self.OnPlayPause)
@@ -208,15 +259,64 @@ class Ui_MainWindow(object):
         # QSlider events
         self.slider.sliderPressed.connect(self.OnSliderPressed)
         self.slider.sliderReleased.connect(self.OnSliderRelease)
-        self.slider.sliderMoved.connect(self.OnSliderMove)
-        
+        self.slider.sliderMoved.connect(self.OnSliderMove)       
 
+    """
+    Side menu button events
+    """
     def OnChooseFolder(self):
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Open music")
-        media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(filename))
+        # Choose the folder
+        folder_dir = QtWidgets.QFileDialog.getExistingDirectory(None, "Select music folder", "")
+        # Get the tracks directory's and names
+        track_list = utils.get_tracks_from_directory(folder_dir)
+
+        # Clear the track_list_view_container
+        for i in reversed(range(1, self.track_list_view_container.count())): 
+            self.track_list_view_container.itemAt(i).widget().setParent(None)
+
+        # Add in all the tracks found inside the folder
+        for track in track_list:
+            track_dir = track['dirpath']
+            track_name = track['filename']
+            # Create a frame to store the information about the track
+            frame = QtWidgets.QFrame()
+            layout = QtWidgets.QHBoxLayout(frame)
+
+            label_track_name = QtWidgets.QLabel(track_name)
+            label_track_name.setFont(self.font)
+            layout.addWidget(label_track_name, 0, QtCore.Qt.AlignLeft)
+
+            layout.addWidget(self.AddTrackPlayButton(track_dir), 0, QtCore.Qt.AlignRight)
+
+            self.track_list_view_container.addWidget(frame)
+        #media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(filename))
+        #self.player.setMedia(media)
+        #self.player.play()
+    
+    def AddTrackPlayButton(self, track_dir):
+        btn_play = QtWidgets.QPushButton()
+        btn_play.setText("Play")
+        btn_play.setFont(self.font)
+        btn_play.setFixedSize(50, 30)
+        btn_play.clicked.connect(lambda: self.OnPlayTrack(track_dir))
+        btn_play.setStyleSheet("""
+            QPushButton::hover {
+                background-color: rgb(29, 29, 29)
+            }
+        """)
+        return btn_play
+
+    """
+    Track list view button events
+    """
+    def OnPlayTrack(self, track_dir):
+        media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(track_dir))
         self.player.setMedia(media)
         self.player.play()
-    
+
+    """
+    Media player button events
+    """
     def OnPlayPause(self):
         if self.player.state() == QtMultimedia.QMediaPlayer.PlayingState:
             self.player.pause()
@@ -224,7 +324,7 @@ class Ui_MainWindow(object):
             self.player.play()
     
     """
-    QMediaPlayer event functions
+    QMediaPlayer event events
     """
     def OnPositionChange(self, position):
         if self.sliderIsPressed:
@@ -243,7 +343,7 @@ class Ui_MainWindow(object):
             pass
 
     """
-    QSlider event functions
+    QSlider event events
     """
     def OnSliderPressed(self):
         self.sliderIsPressed = True
