@@ -1,3 +1,4 @@
+from app import App
 import os
 
 def convert_miliseconds(ms):
@@ -14,6 +15,10 @@ def convert_miliseconds(ms):
     return minutes + ":" + seconds
 
 def get_tracks_from_directory(dir):
+    if not os.path.exists(dir):
+        App.remove_track_dir(dir)
+        print("This directory does not exist.")
+        return []
     track_list = []
     # Walk through the directory
     for (dirpath, dirnames, filenames) in os.walk(dir):
@@ -22,7 +27,15 @@ def get_tracks_from_directory(dir):
             # If the file is not a track continue on to the next iteration of the loop
             if ext not in [".wav", ".mp3"]:
                 continue
-            data = {'dirpath': os.path.join(dirpath, filename), 'filename': filename}
+            data = {'dirpath': os.path.join(dirpath, filename), 'filename': t_name}
             track_list.append(data)
+    # Sort the tracks in alphabetical order according to their filename
+    track_list = sorted(track_list, key=lambda x: x['filename'])
+    return track_list
+
+def get_tracks_from_multiple_directories(dirs):
+    track_list = []
+    for dir in dirs:
+        track_list += get_tracks_from_directory(dir)
     track_list = sorted(track_list, key=lambda x: x['filename'])
     return track_list

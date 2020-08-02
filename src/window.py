@@ -1,4 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
+
+from app import App
 import utils
 
 class Ui_MainWindow(object):
@@ -33,8 +35,12 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.player = QtMultimedia.QMediaPlayer(None)
+        self.playerDuration = 0
 
         self.ConnectEvents()
+
+        App.init()
+        self.LoadTracks()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -90,10 +96,13 @@ class Ui_MainWindow(object):
         self.track_list_view_container = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.track_list_view_container.setAlignment(QtCore.Qt.AlignTop)
         self.track_list_view_container.setObjectName("track_list_view_container")
+        self.track_list_view_container.setContentsMargins(15, 15, 15, 15)
 
         self.listView.setWidget(self.scrollAreaWidgetContents)
 
-        self.track_list_view_container.addWidget(QtWidgets.QLabel("Music"))
+        lbl = QtWidgets.QLabel("Music")
+        lbl.setFont(self.font)
+        self.track_list_view_container.addWidget(lbl)
 
     def setupMediaPlayerView(self):
         self.mediaPlayerView = QtWidgets.QFrame(self.mainView)
@@ -261,27 +270,58 @@ class Ui_MainWindow(object):
         self.slider.sliderReleased.connect(self.OnSliderRelease)
         self.slider.sliderMoved.connect(self.OnSliderMove)       
 
-    """
-    Side menu button events
-    """
-    def OnChooseFolder(self):
-        # Choose the folder
-        folder_dir = QtWidgets.QFileDialog.getExistingDirectory(None, "Select music folder", "")
-        # Get the tracks directory's and names
-        track_list = utils.get_tracks_from_directory(folder_dir)
+    def LoadTracks(self):
+        # For every directory inside the settings.pkl file load in the tracks
+        track_list = utils.get_tracks_from_multiple_directories(App.track_dirs)
 
         # Clear the track_list_view_container
-        for i in reversed(range(1, self.track_list_view_container.count())): 
+        for i in reversed(range(1, self.track_list_view_container.count())):
             self.track_list_view_container.itemAt(i).widget().setParent(None)
 
+        # This keeps track of the initial letter of the track
+        initial = ""
+        counter = 0
         # Add in all the tracks found inside the folder
         for track in track_list:
-            track_dir = track['dirpath']
-            track_name = track['filename']
+            track_dir = track["dirpath"]
+            track_name = track["filename"]
+
+            # If there is a new initial letter put in a label
+            if initial != track_name[0].upper():
+                # First add a spacer to distinguish between each group
+                spacer = QtWidgets.QLabel("")
+                spacer.setFixedHeight(10)
+                self.track_list_view_container.addWidget(spacer)
+
+                # Add in the label
+                initial = track_name[0].upper()
+                labelInitial = QtWidgets.QLabel(track_name[0].upper())
+                font_size = self.font.pointSize()
+                self.font.setPointSize(16)
+                labelInitial.setFont(self.font)
+                self.font.setPointSize(font_size)
+                labelInitial.setStyleSheet("""
+                    QLabel{
+                        color: #3C8FCF
+                    }
+                """)
+                self.track_list_view_container.addWidget(labelInitial)
+
+                # And reset the counter
+                counter = 0
+
             # Create a frame to store the information about the track
             frame = QtWidgets.QFrame()
+            # On every odd frame change the background-color to a different one 
+            # for visibility reasons
+            if counter % 2 == 1:
+                frame.setStyleSheet("""
+                    QFrame{
+                        background-color: #252525;
+                    }
+                """)
             layout = QtWidgets.QHBoxLayout(frame)
-
+            layout.setContentsMargins(15, 10, 7, 10)
             label_track_name = QtWidgets.QLabel(track_name)
             label_track_name.setFont(self.font)
             layout.addWidget(label_track_name, 0, QtCore.Qt.AlignLeft)
@@ -289,10 +329,8 @@ class Ui_MainWindow(object):
             layout.addWidget(self.AddTrackPlayButton(track_dir), 0, QtCore.Qt.AlignRight)
 
             self.track_list_view_container.addWidget(frame)
-        #media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(filename))
-        #self.player.setMedia(media)
-        #self.player.play()
-    
+            counter += 1
+
     def AddTrackPlayButton(self, track_dir):
         btn_play = QtWidgets.QPushButton()
         btn_play.setText("Play")
@@ -301,10 +339,21 @@ class Ui_MainWindow(object):
         btn_play.clicked.connect(lambda: self.OnPlayTrack(track_dir))
         btn_play.setStyleSheet("""
             QPushButton::hover {
-                background-color: rgb(29, 29, 29)
+                background-color: rgb(100, 100, 100)
             }
         """)
         return btn_play
+
+    """
+    Side menu button events
+    """
+    def OnChooseFolder(self):
+        # Choose the folder
+        folder_dir = QtWidgets.QFileDialog.getExistingDirectory(None, "Select music folder", "")
+        # Add the folder into the list of track directories
+        App.add_track_dir(folder_dir)
+        # Load the tracks
+        self.LoadTracks()
 
     """
     Track list view button events
@@ -326,12 +375,18 @@ class Ui_MainWindow(object):
     """
     QMediaPlayer event events
     """
+    def OnTrackEnd(self):
+        # TODO Implement OnTrackEnd()
+        pass
     def OnPositionChange(self, position):
+        if position == self.playerDuration:
+            self.OnTrackEnd()
         if self.sliderIsPressed:
             return
         self.slider.setValue(position)
         self.mediaPlayerLabelTimeStamp.setText(utils.convert_miliseconds(position))
     def OnDurationChange(self, duration):
+        self.playerDuration = duration
         self.slider.setRange(0, duration)
         self.mediaPlayerLabelLength.setText(utils.convert_miliseconds(duration))
     def OnStateChange(self, state):
