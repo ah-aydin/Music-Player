@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 
 from app import App
+from track_frame import TrackFrame
 import utils
 
 class Ui_MainWindow(object):
@@ -271,6 +272,9 @@ class Ui_MainWindow(object):
         self.slider.sliderMoved.connect(self.OnSliderMove)       
 
     def LoadTracks(self):
+        # Clear the track_list
+        App.clear_track_list()
+
         # For every directory inside the settings.pkl file load in the tracks
         track_list = utils.get_tracks_from_multiple_directories(App.track_dirs)
 
@@ -307,42 +311,17 @@ class Ui_MainWindow(object):
                 """)
                 self.track_list_view_container.addWidget(labelInitial)
 
-                # And reset the counter
-                counter = 0
-
             # Create a frame to store the information about the track
-            frame = QtWidgets.QFrame()
             # On every odd frame change the background-color to a different one 
             # for visibility reasons
+            bg_color = "#000000"
             if counter % 2 == 1:
-                frame.setStyleSheet("""
-                    QFrame{
-                        background-color: #252525;
-                    }
-                """)
-            layout = QtWidgets.QHBoxLayout(frame)
-            layout.setContentsMargins(15, 10, 7, 10)
-            label_track_name = QtWidgets.QLabel(track_name)
-            label_track_name.setFont(self.font)
-            layout.addWidget(label_track_name, 0, QtCore.Qt.AlignLeft)
-
-            layout.addWidget(self.AddTrackPlayButton(track_dir), 0, QtCore.Qt.AlignRight)
+                bg_color = "#252525"
+            print(counter)
+            frame = TrackFrame(self.player, track_name, track_dir, self.font, counter, bg_color)
 
             self.track_list_view_container.addWidget(frame)
             counter += 1
-
-    def AddTrackPlayButton(self, track_dir):
-        btn_play = QtWidgets.QPushButton()
-        btn_play.setText("Play")
-        btn_play.setFont(self.font)
-        btn_play.setFixedSize(50, 30)
-        btn_play.clicked.connect(lambda: self.OnPlayTrack(track_dir))
-        btn_play.setStyleSheet("""
-            QPushButton::hover {
-                background-color: rgb(100, 100, 100)
-            }
-        """)
-        return btn_play
 
     """
     Side menu button events
@@ -354,14 +333,6 @@ class Ui_MainWindow(object):
         App.add_track_dir(folder_dir)
         # Load the tracks
         self.LoadTracks()
-
-    """
-    Track list view button events
-    """
-    def OnPlayTrack(self, track_dir):
-        media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(track_dir))
-        self.player.setMedia(media)
-        self.player.play()
 
     """
     Media player button events
@@ -376,10 +347,12 @@ class Ui_MainWindow(object):
     QMediaPlayer event events
     """
     def OnTrackEnd(self):
-        # TODO Implement OnTrackEnd()
-        pass
+        next_track = App.get_next_track()
+        media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(next_track))
+        self.player.setMedia(media)
+        self.player.play()
     def OnPositionChange(self, position):
-        if position == self.playerDuration:
+        if position == self.playerDuration and position != 0:
             self.OnTrackEnd()
         if self.sliderIsPressed:
             return
