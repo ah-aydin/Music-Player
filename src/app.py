@@ -72,6 +72,15 @@ class App:
     @classmethod
     def get_next_track(cls):
         cls.playlist_index += 1
+        if cls.playlist_index >= len(cls.playlist):
+            cls.playlist_index = 0
+        return cls.playlist[cls.playlist_index]
+    
+    @classmethod
+    def get_prev_track(cls):
+        cls.playlist_index -= 1
+        if cls.playlist_index < 0:
+            cls.playlist_index = len(cls.playlist) - 1
         return cls.playlist[cls.playlist_index]
 
     """

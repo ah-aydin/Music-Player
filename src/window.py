@@ -259,7 +259,11 @@ class Ui_MainWindow(object):
 
     def ConnectEvents(self):
         self.btnChooseFolder.clicked.connect(self.OnChooseFolder)
+
+        # Media Player events
         self.btnPlayPause.clicked.connect(self.OnPlayPause)
+        self.btnNext.clicked.connect(self.OnNext)
+        self.btnPrev.clicked.connect(self.OnPrev)
 
         # QMediaPlayer events
         self.player.stateChanged.connect(self.OnStateChange)
@@ -285,6 +289,7 @@ class Ui_MainWindow(object):
         # This keeps track of the initial letter of the track
         initial = ""
         counter = 0
+        color_counter = 0
         # Add in all the tracks found inside the folder
         for track in track_list:
             track_dir = track["dirpath"]
@@ -311,17 +316,20 @@ class Ui_MainWindow(object):
                 """)
                 self.track_list_view_container.addWidget(labelInitial)
 
+                # Reset the color-counter
+                color_counter = 0
+
             # Create a frame to store the information about the track
             # On every odd frame change the background-color to a different one 
             # for visibility reasons
             bg_color = "#000000"
-            if counter % 2 == 1:
+            if color_counter % 2 == 1:
                 bg_color = "#252525"
-            print(counter)
             frame = TrackFrame(self.player, track_name, track_dir, self.font, counter, bg_color)
 
             self.track_list_view_container.addWidget(frame)
             counter += 1
+            color_counter += 1
 
     """
     Side menu button events
@@ -342,6 +350,18 @@ class Ui_MainWindow(object):
             self.player.pause()
         else:
             self.player.play()
+    
+    def OnNext(self):
+        track = App.get_next_track()
+        media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(track))
+        self.player.setMedia(media)
+        self.player.play()
+    
+    def OnPrev(self):
+        track = App.get_prev_track()
+        media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(track))
+        self.player.setMedia(media)
+        self.player.play()
     
     """
     QMediaPlayer event events

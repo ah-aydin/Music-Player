@@ -5,7 +5,7 @@ from PyQt5.QtMultimedia import QMediaContent
 from app import App
 
 class TrackFrame(QFrame):
-    def __init__(self, player, track_name, track_dir, font, id, bg_color="#000000"):
+    def __init__(self, player, track_name, track_dir, font, id, bg_color):
         super(TrackFrame, self).__init__()
         self.id = id
 
