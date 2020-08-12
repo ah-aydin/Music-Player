@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
+import os
 
 from app import App
 from track_frame import TrackFrame
@@ -40,7 +41,7 @@ class Ui_MainWindow(object):
 
         self.ConnectEvents()
 
-        App.init()
+        App.init(self)
         self.LoadTracks()
 
     def retranslateUi(self, MainWindow):
@@ -56,18 +57,22 @@ class Ui_MainWindow(object):
         self.contentView.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.contentView.setFrameShadow(QtWidgets.QFrame.Raised)
         self.contentView.setObjectName("contentView")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.contentView)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout_content_view = QtWidgets.QHBoxLayout(self.contentView)
+        self.horizontalLayout_content_view.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_content_view.setSpacing(0)
+        self.horizontalLayout_content_view.setObjectName("horizontalLayout_content_view")
 
         # The side-menu that has a list of buttons to swap between views and choose the musics folder
         self.setupSideMenu()
-        self.horizontalLayout.addWidget(self.sideMenu)
+        self.horizontalLayout_content_view.addWidget(self.sideMenu)
 
         # The list-view that contains all the tracks from the chosen directory
-        self.setupListView()
-        self.horizontalLayout.addWidget(self.listView)
+        self.setupMyMusicView()
+        self.horizontalLayout_content_view.addWidget(self.myMusicView)
+
+        # The view that contains the current playlist
+        self.setupNowPlaying()
+        self.horizontalLayout_content_view.addWidget(self.nowPlayingView)
 
     def setupSideMenu(self):
         self.sideMenu = QtWidgets.QFrame(self.contentView)
@@ -77,33 +82,97 @@ class Ui_MainWindow(object):
         self.sideMenu.setFrameShadow(QtWidgets.QFrame.Raised)
         self.sideMenu.setObjectName("sideMenu")
 
-        self.btnChooseFolder = QtWidgets.QPushButton(self.sideMenu)
-        self.btnChooseFolder.setGeometry(QtCore.QRect(10, 10, 281, 31))
+        self.verticalLayout_sideMenu = QtWidgets.QVBoxLayout(self.sideMenu)
+        self.verticalLayout_sideMenu.setAlignment(QtCore.Qt.AlignTop)
+        self.verticalLayout_sideMenu.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_sideMenu.setSpacing(0)
+
+        # Choose folder button
+        self.btnChooseFolder = QtWidgets.QPushButton()
+        self.btnChooseFolder.setFixedHeight(50)
         self.font = QtGui.QFont()
         self.font.setFamily("Yu Gothic UI Semibold")
         self.font.setPointSize(12)
         self.btnChooseFolder.setFont(self.font)
-        self.btnChooseFolder.setStyleSheet("")
+        self.btnChooseFolder.setStyleSheet("""
+            QPushButton::hover {
+                background-color: rgb(125, 125, 125);
+            }
+        """)
         self.btnChooseFolder.setObjectName("btnChooseFolder")
+        self.verticalLayout_sideMenu.addWidget(self.btnChooseFolder)
 
-    def setupListView(self):
-        self.listView = QtWidgets.QScrollArea(self.contentView)
-        self.listView.setStyleSheet("background-color: black")
-        self.listView.setWidgetResizable(True)
-        self.listView.setObjectName("listView")
+        # Music list-view button
+        self.btnMyMusic = QtWidgets.QPushButton()
+        self.btnMyMusic.setText("My Music")
+        self.btnMyMusic.setFixedHeight(50)
+        self.btnMyMusic.setFont(self.font)
+        self.btnMyMusic.setStyleSheet("""
+            QPushButton::hover {
+                background-color: rgb(125, 125, 125);
+            }
+        """)
+        self.btnMyMusic.setObjectName("btnMyMusic")
+        self.verticalLayout_sideMenu.addWidget(self.btnMyMusic)
+
+        # Currently playing playlist view button
+        self.btnNowPlaying = QtWidgets.QPushButton()
+        self.btnNowPlaying.setText("Now Playing")
+        self.btnNowPlaying.setFixedHeight(50)
+        self.btnNowPlaying.setFont(self.font)
+        self.btnNowPlaying.setStyleSheet("""
+            QPushButton::hover {
+                background-color: rgb(125, 125, 125);
+            }
+        """)
+        self.btnNowPlaying.setObjectName("btnNowPlaying")
+        self.verticalLayout_sideMenu.addWidget(self.btnNowPlaying)
+
+    def setupMyMusicView(self):
+        self.myMusicView = QtWidgets.QScrollArea(self.contentView)
+        self.myMusicView.setStyleSheet("background-color: black")
+        self.myMusicView.setWidgetResizable(True)
+        self.myMusicView.setObjectName("myMusicView")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 808, 476))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.track_list_view_container = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
-        self.track_list_view_container.setAlignment(QtCore.Qt.AlignTop)
-        self.track_list_view_container.setObjectName("track_list_view_container")
-        self.track_list_view_container.setContentsMargins(15, 15, 15, 15)
+        self.my_music_view_container = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.my_music_view_container.setAlignment(QtCore.Qt.AlignTop)
+        self.my_music_view_container.setObjectName("my_music_view_container")
+        self.my_music_view_container.setContentsMargins(15, 15, 15, 15)
 
-        self.listView.setWidget(self.scrollAreaWidgetContents)
+        self.myMusicView.setWidget(self.scrollAreaWidgetContents)
 
         lbl = QtWidgets.QLabel("Music")
+        temp = self.font.pointSize()
+        self.font.setPointSize(22)
         lbl.setFont(self.font)
-        self.track_list_view_container.addWidget(lbl)
+        self.font.setPointSize(temp)
+        self.my_music_view_container.addWidget(lbl)
+
+    def setupNowPlaying(self):
+        self.nowPlayingView = QtWidgets.QScrollArea(self.contentView)
+        self.nowPlayingView.setStyleSheet("background-color: black")
+        self.nowPlayingView.setWidgetResizable(True)
+        self.nowPlayingView.setObjectName("nowPlayingView")
+        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 808, 476))
+        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
+        self.now_playing_view_container = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents_2)
+        self.now_playing_view_container.setAlignment(QtCore.Qt.AlignTop)
+        self.now_playing_view_container.setObjectName("now_playing_view_container")
+        self.now_playing_view_container.setContentsMargins(15, 15, 15, 15)
+
+        self.nowPlayingView.setWidget(self.scrollAreaWidgetContents_2)
+
+        lbl = QtWidgets.QLabel("Playlist")
+        temp = self.font.pointSize()
+        self.font.setPointSize(22)
+        lbl.setFont(self.font)
+        self.font.setPointSize(temp)
+        self.now_playing_view_container.addWidget(lbl)
+
+        self.nowPlayingView.hide()
 
     def setupMediaPlayerView(self):
         self.mediaPlayerView = QtWidgets.QFrame(self.mainView)
@@ -114,12 +183,34 @@ class Ui_MainWindow(object):
         self.mediaPlayerView.setFrameShadow(QtWidgets.QFrame.Raised)
         self.mediaPlayerView.setObjectName("mediaPlayerView")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.mediaPlayerView)
-        self.horizontalLayout_2.setContentsMargins(-1, 0, -1, 0)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
 
+
+        self.lblCurrentTrack = QtWidgets.QLabel("Current track")
+        self.lblCurrentTrack.setFixedWidth(250)
+        self.lblCurrentTrack.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
+        self.lblCurrentTrack.setWordWrap(True)
+        temp = self.font.pointSize()
+        self.font.setPointSize(13)
+        self.lblCurrentTrack.setFont(self.font)
+        self.font.setPointSize(temp)
+        self.lblCurrentTrack.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        self.lblCurrentTrack.setContentsMargins(10, 10, 10, 10)
+        self.horizontalLayout_2.addWidget(self.lblCurrentTrack, QtCore.Qt.AlignLeft)
+
+        self.setupMediaPlayer()
+        self.horizontalLayout_2.addWidget(self.mediaPlayer)
+
+        spacer = QtWidgets.QLabel("")
+        spacer.setFixedWidth(250)
+        spacer.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
+        self.horizontalLayout_2.addWidget(spacer, QtCore.Qt.AlignRight)
+    
+    def setupMediaPlayer(self):
         self.mediaPlayer = QtWidgets.QFrame(self.mediaPlayerView)
         self.mediaPlayer.setMinimumSize(QtCore.QSize(500, 0))
-        self.mediaPlayer.setMaximumSize(QtCore.QSize(500, 16777215))
+        self.mediaPlayer.setMaximumSize(QtCore.QSize(2000, 16777215))
         self.mediaPlayer.setStyleSheet("")
         self.mediaPlayer.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.mediaPlayer.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -127,10 +218,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.mediaPlayer)
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.verticalLayout_3.setAlignment(QtCore.Qt.AlignCenter)
 
         self.mediaPlayerButtons = QtWidgets.QFrame(self.mediaPlayer)
         self.mediaPlayerButtons.setMinimumSize(QtCore.QSize(0, 78))
-        self.mediaPlayerButtons.setStyleSheet("red")
         self.mediaPlayerButtons.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.mediaPlayerButtons.setFrameShadow(QtWidgets.QFrame.Raised)
         self.mediaPlayerButtons.setObjectName("mediaPlayerButtons")
@@ -202,9 +293,11 @@ class Ui_MainWindow(object):
         self.btnLoop.setText("")
         self.btnLoop.setObjectName("btnLoop")
         self.verticalLayout_3.addWidget(self.mediaPlayerButtons)
+
         self.sliderBarContainer = QtWidgets.QFrame(self.mediaPlayer)
         self.sliderBarContainer.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.sliderBarContainer.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.sliderBarContainer.setMaximumWidth(498)
         self.sliderBarContainer.setObjectName("sliderBarContainer")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.sliderBarContainer)
         self.horizontalLayout_3.setContentsMargins(7, 0, 7, 0)
@@ -221,7 +314,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.mediaPlayerLabelTimeStamp)
 
         self.slider = QtWidgets.QSlider(self.sliderBarContainer)
-        self.slider.setFixedWidth(367)
+        self.slider.setMaximumWidth(367)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
         self.slider.setObjectName("slider")
         self.slider.setStyleSheet("""
@@ -255,15 +348,17 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.mediaPlayerLabelLength)
         self.verticalLayout_3.addWidget(self.sliderBarContainer)
 
-        self.horizontalLayout_2.addWidget(self.mediaPlayer)
-
     def ConnectEvents(self):
+        # Side menu button events
         self.btnChooseFolder.clicked.connect(self.OnChooseFolder)
+        self.btnMyMusic.clicked.connect(self.OnMyMusic)
+        self.btnNowPlaying.clicked.connect(self.OnNowPlaying)
 
         # Media Player events
         self.btnPlayPause.clicked.connect(self.OnPlayPause)
         self.btnNext.clicked.connect(self.OnNext)
         self.btnPrev.clicked.connect(self.OnPrev)
+        self.btnShuffle.clicked.connect(self.OnShuffle)
 
         # QMediaPlayer events
         self.player.stateChanged.connect(self.OnStateChange)
@@ -282,9 +377,9 @@ class Ui_MainWindow(object):
         # For every directory inside the settings.pkl file load in the tracks
         track_list = utils.get_tracks_from_multiple_directories(App.track_dirs)
 
-        # Clear the track_list_view_container
-        for i in reversed(range(1, self.track_list_view_container.count())):
-            self.track_list_view_container.itemAt(i).widget().setParent(None)
+        # Clear the my_music_view_container
+        for i in reversed(range(1, self.my_music_view_container.count())):
+            self.my_music_view_container.itemAt(i).widget().setParent(None)
 
         # This keeps track of the initial letter of the track
         initial = ""
@@ -300,7 +395,7 @@ class Ui_MainWindow(object):
                 # First add a spacer to distinguish between each group
                 spacer = QtWidgets.QLabel("")
                 spacer.setFixedHeight(10)
-                self.track_list_view_container.addWidget(spacer)
+                self.my_music_view_container.addWidget(spacer)
 
                 # Add in the label
                 initial = track_name[0].upper()
@@ -314,7 +409,7 @@ class Ui_MainWindow(object):
                         color: #3C8FCF
                     }
                 """)
-                self.track_list_view_container.addWidget(labelInitial)
+                self.my_music_view_container.addWidget(labelInitial)
 
                 # Reset the color-counter
                 color_counter = 0
@@ -327,7 +422,7 @@ class Ui_MainWindow(object):
                 bg_color = "#252525"
             frame = TrackFrame(self.player, track_name, track_dir, self.font, counter, bg_color)
 
-            self.track_list_view_container.addWidget(frame)
+            self.my_music_view_container.addWidget(frame)
             counter += 1
             color_counter += 1
 
@@ -341,28 +436,45 @@ class Ui_MainWindow(object):
         App.add_track_dir(folder_dir)
         # Load the tracks
         self.LoadTracks()
-
+    def OnMyMusic(self):
+        # Hide all the other views
+        self.nowPlayingView.hide()
+        # Show the my music view
+        self.myMusicView.show()
+    def OnNowPlaying(self):
+        # Hide all the other views
+        self.myMusicView.hide()
+        # Show the now playing view
+        self.nowPlayingView.show()
     """
     Media player button events
     """
     def OnPlayPause(self):
         if self.player.state() == QtMultimedia.QMediaPlayer.PlayingState:
+            # TODO Change to play icon
             self.player.pause()
         else:
+            # TODO Change to pause icon
             self.player.play()
-    
     def OnNext(self):
         track = App.get_next_track()
         media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(track))
         self.player.setMedia(media)
         self.player.play()
-    
     def OnPrev(self):
         track = App.get_prev_track()
         media = QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(track))
         self.player.setMedia(media)
         self.player.play()
-    
+    def OnShuffle(self):
+        if App.shuffle == False:
+            # TODO Change to shuffle icon
+            print("Shuffle on")
+        else:
+            # TODO Change to not shuffle icon
+            print("Shuffle off")
+        App.toggle_shuffle()
+
     """
     QMediaPlayer event events
     """
@@ -374,11 +486,18 @@ class Ui_MainWindow(object):
     def OnPositionChange(self, position):
         if position == self.playerDuration and position != 0:
             self.OnTrackEnd()
+            return
         if self.sliderIsPressed:
             return
         self.slider.setValue(position)
         self.mediaPlayerLabelTimeStamp.setText(utils.convert_miliseconds(position))
     def OnDurationChange(self, duration):
+        # Change the current track name
+        track_dir = App.get_current_track()
+        track_base_name = os.path.basename(track_dir)
+        track_name = os.path.splitext(track_base_name)[0]
+        self.lblCurrentTrack.setText(track_name)
+
         self.playerDuration = duration
         self.slider.setRange(0, duration)
         self.mediaPlayerLabelLength.setText(utils.convert_miliseconds(duration))
@@ -402,3 +521,18 @@ class Ui_MainWindow(object):
         self.sliderIsPressed = True
         self.mediaPlayerLabelTimeStamp.setText(utils.convert_miliseconds(position))
         self.sliderPosition = position
+    
+    """
+    Custom events
+    """
+    def OnPlaylistChange(self):
+        # Clear the now_playing_view_container
+        for i in reversed(range(1, self.now_playing_view_container.count())):
+            self.now_playing_view_container.itemAt(i).widget().setParent(None)
+        
+        # Add in all the tracks inside the playlist
+        for track in App.playlist:
+            # TODO Improve this view
+            track_base_name = os.path.basename(track)
+            track_name = os.path.splitext(track_base_name)[0]
+            self.now_playing_view_container.addWidget(QtWidgets.QLabel(track_name))
